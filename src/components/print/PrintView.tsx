@@ -15,7 +15,7 @@ const PAGE_HEIGHT = 720;
  * One slide per page. Each section is pinned to the page box so sub-pixel
  * rounding never spills a slide onto a blank second page, and fills are kept
  * (`print-color-adjust`, in globals) even when the dialog has background
- * graphics off.
+ * graphics off. Slides are scaled with `zoom`, not `transform`: see SlideView.
  */
 const PRINT_CSS = `
 @page { size: 13.333in 7.5in; margin: 0; }
@@ -68,7 +68,7 @@ export function PrintView({ deck }: { deck: Deck }) {
               data-print-page
               className="shadow-[0_8px_32px_rgba(22,22,22,0.08)] print:shadow-none"
             >
-              <SlideView slide={slide} width={PAGE_WIDTH} />
+              <SlideView slide={slide} width={PAGE_WIDTH} fit="zoom" />
             </section>
           ))}
         </main>

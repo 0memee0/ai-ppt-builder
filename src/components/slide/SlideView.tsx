@@ -16,11 +16,19 @@ type Props = {
   /** Element kept in layout but not painted (the editor draws it instead). */
   hideElementId?: string;
   className?: string;
+  /**
+   * How the 1920×1080 artboard is shrunk to `width`. `transform` is the
+   * default and what the editor's pointer math assumes. `zoom` is for print:
+   * Chromium's paginated output drops SVG inside a transformed subtree on
+   * every page after the first, which blanked charts in the exported PDF.
+   */
+  fit?: "transform" | "zoom";
 };
 
-export function SlideView({ slide, width, animate = false, overlay, hideElementId, className }: Props) {
+export function SlideView({ slide, width, animate = false, overlay, hideElementId, className, fit = "transform" }: Props) {
   const theme = useTheme();
   const scale = width / ARTBOARD.w;
+  const scaling = fit === "zoom" ? { zoom: scale } : { transform: `scale(${scale})` };
   return (
     <div
       className={`relative overflow-hidden ${className ?? ""}`}
@@ -33,7 +41,7 @@ export function SlideView({ slide, width, animate = false, overlay, hideElementI
           width: ARTBOARD.w,
           height: ARTBOARD.h,
           background: resolveSlideBackground(slide, theme),
-          transform: `scale(${scale})`,
+          ...scaling,
         }}
       >
         {slide.elements.map((element) => (
