@@ -1,0 +1,243 @@
+@import "tailwindcss";
+
+@theme {
+  --font-sans: ui-sans-serif, system-ui, -apple-system, "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+
+  --color-ground: #f4f1ec;
+  --color-panel: #fbfaf8;
+  --color-ink: #161616;
+  --color-muted: #6b6862;
+  --color-faint: #9c978f;
+  --color-line: #e3ded6;
+  --color-line-strong: #cfc8bd;
+  --color-blue: #2454d6;
+  --color-orange: #e07a3d;
+  --color-danger: #b42318;
+}
+
+@utility bg-spectrum {
+  background-image: linear-gradient(90deg, var(--color-blue), var(--color-orange));
+}
+
+@utility text-spectrum {
+  background-image: linear-gradient(90deg, var(--color-blue), var(--color-orange));
+  background-clip: text;
+  color: transparent;
+}
+
+html,
+body {
+  height: 100%;
+}
+
+body {
+  background: var(--color-ground);
+  color: var(--color-ink);
+  -webkit-font-smoothing: antialiased;
+}
+
+@keyframes stream {
+  from {
+    transform: translateX(-100%);
+  }
+  to {
+    transform: translateX(250%);
+  }
+}
+
+.stream-bar {
+  animation: stream 1.4s ease-in-out infinite;
+}
+
+@keyframes shimmer {
+  from {
+    background-position: 200% 0;
+  }
+  to {
+    background-position: -200% 0;
+  }
+}
+
+.shimmer {
+  background-image: linear-gradient(90deg, var(--color-line) 0%, var(--color-panel) 50%, var(--color-line) 100%);
+  background-size: 200% 100%;
+  animation: shimmer 1.8s linear infinite;
+}
+
+@keyframes grow-bar {
+  0%,
+  100% {
+    transform: scaleY(0.45);
+  }
+  50% {
+    transform: scaleY(1);
+  }
+}
+
+.grow-bar {
+  animation: grow-bar 2.4s ease-in-out infinite;
+}
+
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.rise {
+  animation: rise 260ms ease-out;
+}
+
+@keyframes drift {
+  from {
+    transform: translateY(0);
+  }
+  to {
+    transform: translateY(-10px);
+  }
+}
+
+.drift {
+  animation: drift 6s ease-in-out infinite alternate;
+}
+
+/* Landing: content fades up on load, staggered via animation-delay. */
+@keyframes reveal {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.reveal {
+  animation: reveal 700ms cubic-bezier(0.2, 0.7, 0.2, 1) both;
+}
+
+/* Landing stage: one slide's share of the progress bar filling. */
+@keyframes progress {
+  from {
+    width: 0%;
+  }
+  to {
+    width: 100%;
+  }
+}
+
+.progress {
+  animation: progress 3s linear both;
+}
+
+/* Landing stage: a slide is hoisted up into the frame, then drifts closer while it is shown. */
+@keyframes hoist {
+  from {
+    opacity: 0;
+    transform: translateY(18%) scale(0.86) rotateX(16deg);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes hold {
+  from {
+    transform: scale(1);
+  }
+  to {
+    transform: scale(1.035);
+  }
+}
+
+.hoist {
+  transform-origin: 50% 100%;
+  animation:
+    hoist 900ms cubic-bezier(0.2, 0.7, 0.2, 1) both,
+    hold 2400ms ease-out 900ms forwards;
+}
+
+/* The slide that was showing falls away from the viewer. */
+@keyframes recede {
+  to {
+    opacity: 0;
+    transform: translateY(-10%) scale(1.1) rotateX(-8deg);
+  }
+}
+
+.recede {
+  transform-origin: 50% 0%;
+  animation: recede 700ms cubic-bezier(0.4, 0, 0.6, 1) forwards;
+}
+
+/* The thread the slide hangs from: drops in ahead of it, gone once it lands. */
+@keyframes thread {
+  0% {
+    transform: scaleY(0);
+    opacity: 0;
+  }
+  25% {
+    opacity: 1;
+  }
+  60% {
+    transform: scaleY(1);
+    opacity: 1;
+  }
+  100% {
+    transform: scaleY(1);
+    opacity: 0;
+  }
+}
+
+.thread {
+  transform-origin: 50% 0%;
+  animation: thread 1100ms cubic-bezier(0.2, 0.7, 0.2, 1) both;
+}
+
+/* Blocks on the hoisted slide settle one after another, up to their own `--alpha`. */
+@keyframes block-in {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: var(--alpha);
+    transform: none;
+  }
+}
+
+.block-in {
+  opacity: var(--alpha);
+  animation: block-in 500ms cubic-bezier(0.2, 0.7, 0.2, 1) both;
+}
+
+/* Export: slides keep their fills even when the print dialog's "background graphics" is off. */
+@media print {
+  * {
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .stream-bar,
+  .shimmer,
+  .grow-bar,
+  .rise,
+  .drift,
+  .reveal,
+  .progress,
+  .hoist,
+  .recede,
+  .thread,
+  .block-in {
+    animation: none;
+  }
+}
