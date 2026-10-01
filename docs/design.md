@@ -29,14 +29,14 @@ This is the product. Every other “screen” below is a state of this layout.
 └────────────┴─────────────────────────────────────┴───────────────┘
 ```
 
-| Region | What it shows | What it changes |
-|---|---|---|
-| Top bar | Deck title, undo, redo, export | Title text. Undo and redo restore a snapshot. Export opens print. |
+| Region    | What it shows                               | What it changes                                                                                       |
+| --------- | ------------------------------------------- | ----------------------------------------------------------------------------------------------------- |
+| Top bar   | Deck title, undo, redo, export              | Title text. Undo and redo restore a snapshot. Export opens print.                                     |
 | Filmstrip | One thumbnail per slide, 16:9, index, title | Click sets the active slide. Drag reorders. A thumbnail is a drop target while an element is dragged. |
-| Toolbar | Insert text, image, chart, table, shape | Inserts on the active slide and selects the new element. |
-| Artboard | The active slide’s elements, scaled to fit | Select, type, drag, resize. |
-| Inspector | Only for a chart, table, or image selection | Data, type, alt text, replace image. Text is edited on the artboard. |
-| Chat | Transcript and composer | Sends a prompt. Shows tool summaries as they land. |
+| Toolbar   | Insert text, image, chart, table, shape     | Inserts on the active slide and selects the new element.                                              |
+| Artboard  | The active slide’s elements, scaled to fit  | Select, type, drag, resize.                                                                           |
+| Inspector | Only for a chart, table, or image selection | Data, type, alt text, replace image. Text is edited on the artboard.                                  |
+| Chat      | Transcript and composer                     | Sends a prompt. Shows tool summaries as they land.                                                    |
 
 The filmstrip title is the text of the element with role `title`, or “Untitled”.
 
@@ -70,24 +70,24 @@ The toolbar shows Duplicate, Delete, Bring forward, and Send backward once somet
 
 Opens under the artboard when the selection is a single chart, table, or image.
 
-| Selection | Inspector |
-|---|---|
-| Chart | Title, type (bar, line, pie, area), a data grid of categories and series, legend and grid toggles |
-| Table | Header row and body cells |
-| Image | Alt text, fit (cover or contain), Replace, which opens a file picker |
+| Selection | Inspector                                                                                         |
+| --------- | ------------------------------------------------------------------------------------------------- |
+| Chart     | Title, type (bar, line, pie, area), a data grid of categories and series, legend and grid toggles |
+| Table     | Header row and body cells                                                                         |
+| Image     | Alt text, fit (cover or contain), Replace, which opens a file picker                              |
 
 Changing chart type keeps the grid. Editing a cell commits when the cell blurs.
 
 ### Drag
 
-| Gesture | What the user sees | On drop |
-|---|---|---|
-| Move on the artboard | The element follows the pointer. Guides appear when an edge or center lines up with a sibling or the artboard center. Position snaps by 8px in the 1920×1080 space. | Frame updates. Selection stays. |
-| Resize | The handle follows the pointer. The opposite corner stays fixed. Size snaps by 8px. | Frame updates. |
-| Reorder slides | A horizontal line between thumbnails shows the insertion index. | Slide order updates. The dragged slide stays active. |
-| Cross-slide | The filmstrip thumbnail under the pointer gets a spectrum outline. | The element’s parent becomes that slide. The view follows it: that slide becomes active and the element stays selected. |
-| Option held | The same gestures. The ghost is labeled “Copy”. | A new element lands on the target. The original stays. |
-| Escape | The ghost disappears. | Nothing is written. |
+| Gesture              | What the user sees                                                                                                                                                  | On drop                                                                                                                 |
+| -------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------- |
+| Move on the artboard | The element follows the pointer. Guides appear when an edge or center lines up with a sibling or the artboard center. Position snaps by 8px in the 1920×1080 space. | Frame updates. Selection stays.                                                                                         |
+| Resize               | The handle follows the pointer. The opposite corner stays fixed. Size snaps by 8px.                                                                                 | Frame updates.                                                                                                          |
+| Reorder slides       | A horizontal line between thumbnails shows the insertion index.                                                                                                     | Slide order updates. The dragged slide stays active.                                                                    |
+| Cross-slide          | The filmstrip thumbnail under the pointer gets a spectrum outline.                                                                                                  | The element’s parent becomes that slide. The view follows it: that slide becomes active and the element stays selected. |
+| Option held          | The same gestures. The ghost is labeled “Copy”.                                                                                                                     | A new element lands on the target. The original stays.                                                                  |
+| Escape               | The ghost disappears.                                                                                                                                               | Nothing is written.                                                                                                     |
 
 A drop that would hang off the artboard is clamped inside it. The drop still completes.
 
@@ -160,27 +160,27 @@ History stores full deck snapshots, capped at 50, and is not saved. A later patc
 
 ### Who writes the deck
 
-| Source | When it writes | History |
-|---|---|---|
-| Model tools | As each tool lands during a turn | One entry for the whole message, on success |
-| Artboard typing, inspector cells, chart fields | On blur, if the value changed | One entry |
-| Drag, resize, reorder, cross-slide drop | On pointer-up | One entry |
-| Insert, duplicate, delete, z-order, retitle | On the action | One entry |
-| Interrupted or failed model turn | Keeps every tool call that landed; slides planned but not filled stay marked pending and can be continued | One entry if anything landed, otherwise none |
+| Source                                         | When it writes                                                                                            | History                                      |
+| ---------------------------------------------- | --------------------------------------------------------------------------------------------------------- | -------------------------------------------- |
+| Model tools                                    | As each tool lands during a turn                                                                          | One entry for the whole message, on success  |
+| Artboard typing, inspector cells, chart fields | On blur, if the value changed                                                                             | One entry                                    |
+| Drag, resize, reorder, cross-slide drop        | On pointer-up                                                                                             | One entry                                    |
+| Insert, duplicate, delete, z-order, retitle    | On the action                                                                                             | One entry                                    |
+| Interrupted or failed model turn               | Keeps every tool call that landed; slides planned but not filled stay marked pending and can be continued | One entry if anything landed, otherwise none |
 
 Clicking a thumbnail, changing selection, and moving the pointer during a drag do not write the deck and do not write history. The drag preview lives in `gesture` until pointer-up or Escape.
 
 ### Who reads
 
-| Surface | Reads |
-|---|---|
-| Artboard | Active slide, selection, gesture preview |
-| Filmstrip | Slide order, titles, active slide, gesture drop target |
-| Inspector | The single selected element |
-| Chat | Messages, agent status |
-| Model | A projection of the deck at the start of the turn, then tool results |
-| Print | The deck only |
-| Save | The project, after the deck or the transcript changes |
+| Surface   | Reads                                                                |
+| --------- | -------------------------------------------------------------------- |
+| Artboard  | Active slide, selection, gesture preview                             |
+| Filmstrip | Slide order, titles, active slide, gesture drop target               |
+| Inspector | The single selected element                                          |
+| Chat      | Messages, agent status                                               |
+| Model     | A projection of the deck at the start of the turn, then tool results |
+| Print     | The deck only                                                        |
+| Save      | The project, after the deck or the transcript changes                |
 
 During a model turn the user can change the active slide. User writes wait until the turn commits or rolls back. Undo and redo wait with them.
 

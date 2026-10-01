@@ -31,7 +31,7 @@ export const LAYOUTS = [
     id: "content",
     name: "Content",
     description: "title + body",
-    hint: "Content slide: one or two body text elements, or one text element plus a table, chart, or image.",
+    hint: "Content slide: one body text element with 3–5 bullet lines in the body region; a second short text element or an image only when the intent calls for it.",
     hero: false,
     regions: { title: TITLE, body: BODY },
   },
@@ -64,6 +64,14 @@ export const LAYOUTS = [
     hint: "Chart-forward: one add_chart in the chart region with real-looking series, and one short body text element as the takeaway in the note region.",
     hero: false,
     regions: { title: TITLE, chart: f(120, 220, 1120, 760), note: f(1300, 260, 500, 640) },
+  },
+  {
+    id: "table-forward",
+    name: "Table",
+    description: "one table with a short note",
+    hint: 'Table-forward: one add_element type "table" in the table region with 3–5 columns and 3–6 rows of concrete values, and one two-line body text element as the takeaway in the note region.',
+    hero: false,
+    regions: { title: TITLE, table: f(120, 220, 1680, 540), note: f(120, 800, 1680, 160) },
   },
   {
     id: "blank",

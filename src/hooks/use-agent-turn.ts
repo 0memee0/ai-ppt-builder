@@ -109,7 +109,8 @@ export function useAgentTurn() {
         useDeckStore.getState().setActiveSlide(created[0]);
         useDeckStore.getState().setPendingSlides(created);
 
-        await populatePending(messages, ui, signal);
+        const empty = await populatePending(messages, ui, signal);
+        if (empty.length > 0) throw new Error(emptyNote(empty));
         return summarize(created.length);
       });
     },
@@ -124,7 +125,8 @@ export function useAgentTurn() {
     const count = pendingIds().length;
 
     await runTurn("Continue generating", async ({ ui, signal }) => {
-      await populatePending(messages, ui, signal);
+      const empty = await populatePending(messages, ui, signal);
+      if (empty.length > 0) throw new Error(emptyNote(empty));
       return `Finished the remaining ${count} slide${count === 1 ? "" : "s"}. Ask for changes, or edit on the canvas.`;
     });
   }, [runTurn]);
@@ -143,13 +145,51 @@ export function useAgentTurn() {
 
 type TurnContext = { ui: MessageUpdater; signal: AbortSignal };
 
-/** Populates each pending slide in order, clearing it from the pending list as it lands. */
-async function populatePending(messages: ChatTurn[], ui: MessageUpdater, signal: AbortSignal) {
+/**
+ * Populates each pending slide in order. A slide only leaves the pending list
+ * once it has content below its title: a reply that landed nothing gets one
+ * more try with a pointed nudge, and a slide still empty after that stays
+ * pending so Continue can finish it. Returns the 1-based indexes left empty.
+ */
+async function populatePending(messages: ChatTurn[], ui: MessageUpdater, signal: AbortSignal): Promise<number[]> {
+  const empty: number[] = [];
   for (const slideId of pendingIds()) {
     await runPhase({ phase: "populate", slideId, messages }, ui, signal);
+    if (!hasBody(slideId)) {
+      await runPhase({ phase: "populate", slideId, messages: [...messages, ...nudge(slideId)] }, ui, signal);
+    }
     const store = useDeckStore.getState();
+    if (!hasBody(slideId)) {
+      empty.push(store.deck.slides.findIndex((s) => s.id === slideId) + 1);
+      continue;
+    }
     store.setPendingSlides(store.agent.pendingSlideIds.filter((id) => id !== slideId));
   }
+  return empty;
+}
+
+/** True once the slide holds anything besides its title element. */
+function hasBody(slideId: string): boolean {
+  const slide = useDeckStore.getState().deck.slides.find((s) => s.id === slideId);
+  return (slide?.elements.some((el) => !(el.type === "text" && el.role === "title")) ?? false);
+}
+
+/** The exchange appended before a second populate attempt on a slide that came back title-only. */
+function nudge(slideId: string): ChatTurn[] {
+  const slides = useDeckStore.getState().deck.slides;
+  const index = slides.findIndex((s) => s.id === slideId) + 1;
+  return [
+    { role: "assistant", content: "(no content was added)" },
+    {
+      role: "user",
+      content: `Slide ${index} still has only its title. Add its content now with add_element or add_chart, exactly as the slide instructions describe. Do not reply in text.`,
+    },
+  ];
+}
+
+function emptyNote(indexes: number[]): string {
+  const list = indexes.join(", ");
+  return indexes.length === 1 ? `Slide ${list} came back without content.` : `Slides ${list} came back without content.`;
 }
 
 /** Pending ids that still exist in the deck (undo or delete may have removed some). */

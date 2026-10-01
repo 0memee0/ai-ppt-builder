@@ -57,6 +57,9 @@ Phase: OUTLINE. Decide the slide sequence for the user's request and call add_sl
 
 Create exactly ${slideCount} slide${slideCount === 1 ? "" : "s"}. Calls beyond that are refused. Open with a "title" layout and close with a summary or ask when the count allows.
 
+${mediaMix(slideCount)}
+Start every intent with its medium in brackets, then the sentence: [bullets], [chart], [table], or [image]. For [chart] name the chart type, the categories, and the series; for [table] name the columns and what each row is. Example: "[chart] Bar chart of monthly signups Jan–Jun for Free vs Pro, showing Pro overtaking in May."
+
 You have no live data and cannot look anything up. Never decline, ask a question, or reply in text in this phase: for topics you cannot verify (future events, private figures), outline the deck with plausible, clearly illustrative content and note the assumption in the slide intents.
 
 ${layoutGuide}
@@ -71,7 +74,14 @@ function populatePrompt(deck: Deck, slideId: string | undefined): string {
   const freeY = slide ? Math.max(220, ...slide.elements.map((el) => el.frame.y + el.frame.h + 32)) : 220;
   return `${SHARED}
 
-Phase: FILL ONE SLIDE. Add the body content for slide ${slide?.index ?? "?"} only, using its intent as the brief. Use add_element for text, images, tables, and shapes, and add_chart for charts. The title already exists; do not add another. Do not touch other slides. Aim for 1–4 elements that together fill the body without overlapping. Finish in one response if you can.
+Phase: FILL ONE SLIDE. Add the body content for slide ${slide?.index ?? "?"} only, using its intent as the brief. Use add_element for text, images, tables, and shapes, and add_chart for charts. The title already exists; do not add another. Do not touch other slides. Finish in one response if you can.
+
+A slide with only its title is a failure. Call the tools now; do not reply in text. What this slide needs, by the medium tagged at the start of its intent (infer it from the layout and intent when there is no tag):
+- [chart]: one add_chart filling the chart region, with 4–8 categories and 1–3 series of plausible numbers, then one body text element of exactly two short lines (the takeaway, one sentence per line) in the note region.
+- [table]: one add_element type "table" filling the table region, 3–5 columns and 3–6 rows of concrete values, then one body text element of exactly two short lines in the note region.
+- [bullets] or untagged: one body text element with 3–5 bullet lines, one line per bullet, each a complete point under 90 characters. Add a second short text element or an image only when the intent asks for it.
+- [image]: one image placeholder plus one body text element with 3–5 bullet lines beside it.
+- Hero layouts (title, section): one subtitle text element only.
 
 Deck outline, for context:
 ${outline}
@@ -100,6 +110,16 @@ ${layoutGuide}
 
 Current deck state:
 ${JSON.stringify(projectDeck(deck))}`;
+}
+
+/**
+ * What the outline must contain beyond the opener. A deck is bullets by
+ * default, but anything with room for it also gets one chart and one table
+ * so the user is not left with a wall of text to break up by hand.
+ */
+function mediaMix(slideCount: number): string {
+  if (slideCount < 3) return "Every slide after the opener is a [bullets] slide.";
+  return `Unless the user asks for something else, include at least one chart slide (layout "chart-forward", intent tagged [chart]) and at least one table slide (layout "table-forward", intent tagged [table]), each on the point in the request that most needs numbers or a comparison. Every other slide after the opener is a [bullets] slide: layout "content", "two-column", or "comparison". If the user asks for more charts, tables, or images, plan those too.`;
 }
 
 function slideHints(slide: SlideProjection | undefined): string {
