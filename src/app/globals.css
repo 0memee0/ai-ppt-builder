@@ -3,13 +3,13 @@
 @theme {
   --font-sans: ui-sans-serif, system-ui, -apple-system, "Segoe UI", "Helvetica Neue", Arial, sans-serif;
 
-  --color-ground: #f4f1ec;
-  --color-panel: #fbfaf8;
-  --color-ink: #161616;
-  --color-muted: #6b6862;
-  --color-faint: #9c978f;
-  --color-line: #e3ded6;
-  --color-line-strong: #cfc8bd;
+  --color-ground: #f5f5f5;
+  --color-panel: #ffffff;
+  --color-ink: #111111;
+  --color-muted: #5c5c5c;
+  --color-faint: #8a8a8a;
+  --color-line: #e6e6e6;
+  --color-line-strong: #d0d0d0;
   --color-blue: #2454d6;
   --color-orange: #e07a3d;
   --color-danger: #b42318;

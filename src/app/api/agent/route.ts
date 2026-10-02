@@ -5,6 +5,7 @@ import { agentRequestSchema, type AgentEvent, type AgentRequest } from "@/lib/ag
 import { AgentConfigError, getModel, MAX_OUTPUT_TOKENS } from "@/lib/agent/provider";
 import { repairToolCall } from "@/lib/agent/repair";
 import { createServerTools, createToolSession } from "@/lib/agent/server-tools";
+import { formatLocations } from "@/lib/deck/projection";
 import { PHASE_TOOLS, type ToolResult } from "@/lib/deck/tools/schemas";
 
 export const runtime = "nodejs";
@@ -15,7 +16,7 @@ export const maxDuration = 120;
  * Plan is a single step: with toolChoice "required" every extra step would be
  * forced to add more slides.
  */
-const MAX_STEPS = { plan: 1, populate: 4, refine: 8 } as const;
+const MAX_STEPS = { plan: 1, populate: 2, refine: 8 } as const;
 
 /** Opt-in: when the model answers a "required" tool choice with prose, nudge it once. */
 const RETRY_ON_TEXT = process.env.AGENT_RETRY_ON_TEXT === "1";
@@ -53,7 +54,7 @@ export async function POST(request: Request): Promise<Response> {
   const limits = req.phase === "plan" ? { maxSlides: req.maxSlides ?? DEFAULT_SLIDE_COUNT } : {};
   const session = createToolSession(req.deck, limits);
   const tools = createServerTools(session, req.requestId);
-  const messages: ModelMessage[] = req.messages.map((m) => ({ role: m.role, content: m.content }));
+  const messages = modelMessages(req);
 
   const run = (turn: ModelMessage[]) =>
     streamText({
@@ -135,6 +136,19 @@ export async function POST(request: Request): Promise<Response> {
       "X-Accel-Buffering": "no",
     },
   });
+}
+
+/**
+ * The transcript still quotes where a chart used to be. For a refine, append
+ * the location list to the latest user message so it is the last thing read.
+ * The stored chat is unchanged; this copy is only for the model.
+ */
+function modelMessages(req: AgentRequest): ModelMessage[] {
+  const messages: ModelMessage[] = req.messages.map((m) => ({ role: m.role, content: m.content }));
+  if (req.phase !== "refine") return messages;
+  const last = messages.at(-1);
+  if (!last || last.role !== "user" || typeof last.content !== "string") return messages;
+  return [...messages.slice(0, -1), { role: "user", content: `${last.content}\n\n${formatLocations(req.deck)}` }];
 }
 
 function json(body: unknown, status: number): Response {

@@ -6,7 +6,10 @@ import { useDeckStore } from "@/store/deck-store";
 import { usePendingSlideIds } from "@/store/selectors";
 import type { ChatMessage } from "../types";
 
-/** Shown under a streaming reply: a slide taking shape, and a line on what the model is doing. */
+/**
+ * Shown under a streaming reply. A new deck gets the slide skeleton.
+ * A change to a deck that already exists is one status line.
+ */
 export function WorkingCard({ message }: { message: ChatMessage }) {
   const pending = usePendingSlideIds();
   const slides = useDeckStore((s) => s.deck.slides);
@@ -20,23 +23,41 @@ export function WorkingCard({ message }: { message: ChatMessage }) {
   const current = slides.find((s) => pending.has(s.id));
   const started = (message.steps?.length ?? 0) > 0;
 
+  // A deck that already exists is a refine: no slide is waiting to be filled.
+  // The generating skeleton is for the outline and for those pending slides.
+  const refining = !current && slides.length > 0;
   const headline = current
     ? `${verb} slide ${slides.indexOf(current) + 1} of ${slides.length}`
-    : slides.length === 0
-      ? `${verb} the outline`
-      : `${verb} the changes`;
-  const latest = current ? slideTitle(current) : running?.label ?? (started ? "Almost there" : "Reading the deck");
+    : refining
+      ? "Updating the deck"
+      : `${verb} the outline`;
+  const latest = current
+    ? slideTitle(current)
+    : running?.label ?? (started ? (refining ? "Applying the change" : "Almost there") : "Reading the deck");
   const detail = useHeld(latest, tick);
   const slow = !started && Date.now() - startedAt.current > 8000;
+  const line = slow ? "Still thinking. The first change usually lands within a few seconds." : detail;
+
+  if (refining) {
+    return (
+      <div className="rounded-lg border border-line bg-white px-2.5 py-2" role="status" aria-live="polite" aria-label={headline}>
+        <p className="flex items-center gap-2 text-sm text-ink">
+          <span className="bg-spectrum size-2 shrink-0 animate-pulse rounded-full" />
+          <span className="font-medium">{headline}</span>
+        </p>
+        <p className="mt-0.5 truncate pl-4 text-xs text-muted">{line}</p>
+      </div>
+    );
+  }
 
   return (
     <div className="rounded-lg border border-line bg-white p-2.5" role="status" aria-live="polite" aria-label={headline}>
-      <SlidePlaceholder chart={current?.layout === "chart-forward" || !current} />
+      <SlidePlaceholder chart={!current || current.layout === "chart-forward"} />
       <p key={verb} className="rise mt-2.5 flex items-center gap-2 text-sm text-ink">
         <span className="bg-spectrum size-2 shrink-0 animate-pulse rounded-full" />
         <span className="font-medium">{headline}</span>
       </p>
-      <p className="mt-0.5 truncate pl-4 text-xs text-muted">{slow ? "Still thinking. The first change usually lands within a few seconds." : detail}</p>
+      <p className="mt-0.5 truncate pl-4 text-xs text-muted">{line}</p>
     </div>
   );
 }

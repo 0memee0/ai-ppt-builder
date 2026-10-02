@@ -58,7 +58,7 @@ Phase: OUTLINE. Decide the slide sequence for the user's request and call add_sl
 Create exactly ${slideCount} slide${slideCount === 1 ? "" : "s"}. Calls beyond that are refused. Open with a "title" layout and close with a summary or ask when the count allows.
 
 ${mediaMix(slideCount)}
-Start every intent with its medium in brackets, then the sentence: [bullets], [chart], [table], or [image]. For [chart] name the chart type, the categories, and the series; for [table] name the columns and what each row is. Example: "[chart] Bar chart of monthly signups Jan–Jun for Free vs Pro, showing Pro overtaking in May."
+Start every intent with its medium in brackets, then one sentence on what the slide must say: [bullets], [chart], [table], or [image]. Do not name categories, series, columns, or cell values in this phase; those are created when that slide is filled. Example: "[chart] Monthly signups, Free vs Pro."
 
 You have no live data and cannot look anything up. Never decline, ask a question, or reply in text in this phase: for topics you cannot verify (future events, private figures), outline the deck with plausible, clearly illustrative content and note the assumption in the slide intents.
 
@@ -99,6 +99,8 @@ function refinePrompt(deck: Deck): string {
   return `${SHARED}
 
 Phase: REFINE. The user is asking for a change to an existing deck. Make the smallest set of tool calls that fully satisfies the request. Prefer update_element over delete-and-add, and update_chart_data or change_chart_type for charts. When the user says "slide 3" they mean the slide with index 3 below. If the request is ambiguous, pick the most likely reading and mention it in your summary rather than asking.
+
+Where things are: a location list is appended to the latest user message. It is rebuilt from elements on this request. Use it when the user asks where something is, or says "the chart" or "the table". layout and intent are the original plan and stay behind after a drag or a reorder. Earlier messages can be stale too. If they disagree with the location list, trust the list.
 
 Replacing content: when the user asks to show existing content "as", "instead as", or "in the form of" something else (bullets as a table, numbers as a chart, a table as text), the new element takes the old one's place. Create the new element in the old element's frame, then delete_element the text, table, or chart it replaces. Never leave the old content underneath the new element. Adding alongside is only right when the user says "add" or "also".
 

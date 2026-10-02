@@ -88,7 +88,7 @@ export function Overlay({
               className="pointer-events-none absolute flex items-center justify-center"
               style={{
                 ...frameStyle(el.frame),
-                background: "rgba(251,250,248,0.72)",
+                background: "rgba(255,255,255,0.72)",
                 border: `${px(1.5)}px dashed ${ACCENT}`,
               }}
             >

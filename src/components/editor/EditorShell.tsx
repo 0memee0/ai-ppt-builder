@@ -71,6 +71,7 @@ export function EditorShell({ deckId }: { deckId: string }) {
           onSelect={setActiveSlide}
           onAdd={busy ? undefined : actions.addSlide}
           pendingIds={pendingIds}
+          streaming={busy}
           dropTargetId={drag?.kind === "cross" ? drag.targetSlideId : undefined}
           dropLabel={drag?.kind === "cross" ? drag.targetLabel : undefined}
           reorder={reorder}

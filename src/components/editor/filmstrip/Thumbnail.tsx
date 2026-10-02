@@ -20,6 +20,8 @@ type Props = {
   ghost?: boolean;
   /** Slide has an outline but no elements yet. */
   pending: boolean;
+  /** The moving bar only runs while a turn is streaming. Stop leaves a still mark. */
+  streaming?: boolean;
   onSelect: () => void;
   onPointerDown?: (e: React.PointerEvent) => void;
   /** Omit both to hide the hover actions (model turn in flight). */
@@ -36,6 +38,7 @@ export function Thumbnail({
   placeholder,
   ghost = false,
   pending,
+  streaming = false,
   onSelect,
   onPointerDown,
   onDuplicate,
@@ -80,7 +83,7 @@ export function Thumbnail({
             <SlideView slide={slide} width={THUMB_WIDTH} className="rounded-[5px]" />
             {pending && (
               <span className="absolute inset-x-[2px] bottom-[2px] h-0.5 overflow-hidden rounded-b-[5px] bg-line">
-                <span className="stream-bar bg-spectrum block h-full w-1/3" />
+                <span className={`bg-spectrum block h-full w-1/3 ${streaming ? "stream-bar" : ""}`} />
               </span>
             )}
             {dropTarget && (

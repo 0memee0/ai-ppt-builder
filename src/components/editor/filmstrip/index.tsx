@@ -18,6 +18,8 @@ type Props = {
   reorder?: SlideReorderState | null;
   /** Slide ids that only have an outline so far. */
   pendingIds?: Set<string>;
+  /** Animate the pending mark only while a turn is in flight. */
+  streaming?: boolean;
   onThumbnailPointerDown?: (e: React.PointerEvent, slideId: string, index: number) => void;
   /** Omit to hide per-slide actions (model turn in flight). */
   onDuplicate?: (slideId: string) => void;
@@ -33,6 +35,7 @@ export function Filmstrip({
   dropLabel,
   reorder,
   pendingIds,
+  streaming = false,
   onThumbnailPointerDown,
   onDuplicate,
   onDelete,
@@ -64,6 +67,7 @@ export function Filmstrip({
               dropLabel={dropLabel}
               placeholder={slide.id === reorder?.draggingSlideId}
               pending={pendingIds?.has(slide.id) ?? false}
+              streaming={streaming}
               onSelect={() => onSelect(slide.id)}
               onPointerDown={onThumbnailPointerDown && ((e) => onThumbnailPointerDown(e, slide.id, index))}
               onDuplicate={onDuplicate && (() => onDuplicate(slide.id))}
