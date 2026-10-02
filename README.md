@@ -2,6 +2,23 @@
 
 Design decisions and the tradeoffs that came with them. Screen layout lives in `docs/design.md`.
 
+## Run locally
+
+Node 20 or newer.
+
+```bash
+npm install
+cp .env.example .env.local
+```
+
+Put your Sarvam key in `.env.local` as `SARVAM_API_KEY`. The file is git-ignored. Optional model and reasoning settings are listed in `.env.example`.
+
+```bash
+npm run dev
+```
+
+Open http://localhost:3000. Generation calls `POST /api/agent` on the server; the key never goes to the browser. Restart the dev server after changing `.env.local`.
+
 ## Decisions
 
 - One deck in a Zustand store. Chat, artboard, filmstrip, undo, and print all read it.
